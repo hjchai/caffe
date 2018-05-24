@@ -234,5 +234,15 @@ void CVMatToDatum(const cv::Mat& cv_img, Datum* datum) {
   }
   datum->set_data(buffer);
 }
+
+// @
+void EncodeCVMatToDatum(const cv::Mat& cv_img, const string& encoding,
+                        Datum* datum) {
+  std::vector<uchar> buf;
+  cv::imencode("."+encoding, cv_img, buf);
+  datum->set_data(std::string(reinterpret_cast<char*>(&buf[0]),
+                              buf.size()));
+  datum->set_encoded(true);
+}
 #endif  // USE_OPENCV
 }  // namespace caffe
