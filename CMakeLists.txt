@@ -8,6 +8,7 @@ endif()
 
 # ---[ Caffe project
 project(Caffe C CXX)
+set(CMAKE_BUILD_TYPE Debug)
 
 # ---[ Caffe version
 set(CAFFE_TARGET_VERSION "1.0.0" CACHE STRING "Caffe logical version")
@@ -29,7 +30,7 @@ include(cmake/ConfigGen.cmake)
 # ---[ Options
 caffe_option(CPU_ONLY  "Build Caffe without CUDA support" OFF) # TODO: rename to USE_CUDA
 caffe_option(USE_CUDNN "Build Caffe with cuDNN library support" ON IF NOT CPU_ONLY)
-caffe_option(USE_NCCL "Build Caffe with NCCL library support" OFF)
+caffe_option(USE_NCCL "Build Caffe with NCCL library support" ON)
 caffe_option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 caffe_option(BUILD_python "Build Python wrapper" ON)
 set(python_version "2" CACHE STRING "Specify which Python version to use")

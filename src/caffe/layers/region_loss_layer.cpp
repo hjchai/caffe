@@ -248,12 +248,12 @@ void RegionLossLayer<Dtype>::LayerSetUp(
      biases_.push_back(param.biases(c)); 
   } //0.73 0.87;2.42 2.65;4.30 7.04;10.24 4.59;12.68 11.87;
 
-  //int input_count = bottom[0]->count(1); //h*w*n*(classes+coords+1) = 13*13*5*(20+4+1)
-  //int label_count = bottom[1]->count(1); //30*5
+//   int input_count = bottom[0]->count(1); //h*w*n*(classes+coords+1) = 13*13*5*(20+4+1)
+//   int label_count = bottom[1]->count(1); //30*5
   
-  // outputs: classes, iou, coordinates
-  //int tmp_input_count = side_ * side_ * num_ * (coords_ + num_class_ + 1); //13*13*5*(20+4+1) label: isobj, class_label, coordinates
-  //int tmp_label_count = 30 * (1 + coords_);
+  //outputs: classes, iou, coordinates
+//   int tmp_input_count = side_ * side_ * num_ * (coords_ + num_class_ + 1); //13*13*5*(20+4+1) label: isobj, class_label, coordinates
+//   int tmp_label_count = 30 * (1 + coords_);
   //CHECK_EQ(input_count, tmp_input_count);
   //CHECK_EQ(label_count, tmp_label_count);
 }
@@ -423,7 +423,6 @@ void RegionLossLayer<Dtype>::Forward_cpu(
           for (int n = 0; n < num_; ++n){
 	    int index = b * swap.channels() * swap.height() * swap.width() + (j * side_ + i) * swap.height() * swap.width() + n * swap.width();
 	    CHECK_EQ(swap_data[index],swap.data_at(b, j * side_ + i, n, 0));
-	    
 	    vector<Dtype> pred = get_region_box(swap_data, biases_, n, index, i, j, side_, side_);
             float best_iou = 0;
             //for (int t = 0; t < 30; ++t){
@@ -455,7 +454,6 @@ void RegionLossLayer<Dtype>::Forward_cpu(
 	    if (best_iou > thresh_){
 	      diff[index + 4] = 0;
 	    }
-	    
 	    //if (iter < 12800 / bottom[0]->num()){
 	    //  vector<Dtype> truth;
 	    //  truth.clear();

@@ -41,6 +41,20 @@ message NormalizedBBox {
   optional float size = 8;
 }
 
+// @The label (display) name and label id.
+message LabelMapItem {
+  // Both name and label are required.
+  optional string name = 1;
+  optional int32 label = 2;
+  // display_name is optional.
+  optional string display_name = 3;
+}
+
+// @
+message LabelMap {
+  repeated LabelMapItem item = 1;
+}
+
 // Specifies the shape (dimensions) of a Blob.
 message BlobShape {
   repeated int64 dim = 1 [packed = true];
@@ -462,6 +476,7 @@ message LayerParameter {
   optional TanHParameter tanh_param = 127;
   optional ThresholdParameter threshold_param = 128;
   optional TileParameter tile_param = 138;
+  optional VideoDataParameter video_data_param = 207;
   optional WindowDataParameter window_data_param = 129;
   
   // @Added
@@ -471,6 +486,146 @@ message LayerParameter {
   optional MultiBoxLossParameter multibox_loss_param = 201;
   
   optional PriorBoxParameter prior_box_param = 203;
+  
+  optional NormalizeParameter norm_param = 206;
+  optional PermuteParameter permute_param = 202;
+  optional DetectionOutputParameter detection_output_param = 204;
+  optional DetectionEvaluateParameter detection_evaluate_param = 205;
+  
+  // Yolo detection evaluation layer
+  optional EvalDetectionParameter eval_detection_param = 301;
+}
+
+// @Message that store parameters used by DetectionEvaluateLayer
+message DetectionEvaluateParameter {
+  // Number of classes that are actually predicted. Required!
+  optional uint32 num_classes = 1;
+  // Label id for background class. Needed for sanity check so that
+  // background class is neither in the ground truth nor the detections.
+  optional uint32 background_label_id = 2 [default = 0];
+  // Threshold for deciding true/false positive.
+  optional float overlap_threshold = 3 [default = 0.5];
+  // If true, also consider difficult ground truth for evaluation.
+  optional bool evaluate_difficult_gt = 4 [default = true];
+  // A file which contains a list of names and sizes with same order
+  // of the input DB. The file is in the following format:
+  //    name height width
+  //    ...
+  // If provided, we will scale the prediction and ground truth NormalizedBBox
+  // for evaluation.
+  optional string name_size_file = 5;
+}
+
+// @
+message NonMaximumSuppressionParameter {
+  // Threshold to be used in nms.
+  optional float nms_threshold = 1 [default = 0.3];
+  // Maximum number of results to be kept.
+  optional int32 top_k = 2;
+}
+
+// @
+message SaveOutputParameter {
+  // Output directory. If not empty, we will save the results.
+  optional string output_directory = 1;
+  // Output name prefix.
+  optional string output_name_prefix = 2;
+  // Output format.
+  //    VOC - PASCAL VOC output format.
+  //    COCO - MS COCO output format.
+  optional string output_format = 3;
+  // If you want to output results, must also provide the following two files.
+  // Otherwise, we will ignore saving results.
+  // label map file.
+  optional string label_map_file = 4;
+  // A file which contains a list of names and sizes with same order
+  // of the input DB. The file is in the following format:
+  //    name height width
+  //    ...
+  optional string name_size_file = 5;
+  // Number of test images. It can be less than the lines specified in
+  // name_size_file. For example, when we only want to evaluate on part
+  // of the test images.
+  optional uint32 num_test_image = 6;
+}
+
+// @Message that store parameters used by DetectionOutputLayer
+message DetectionOutputParameter {
+  // Number of classes to be predicted. Required!
+  optional uint32 num_classes = 1;
+  // If true, bounding box are shared among different classes.
+  optional bool share_location = 2 [default = true];
+  // Background label id. If there is no background class,
+  // set it as -1.
+  optional int32 background_label_id = 3 [default = 0];
+  // Parameters used for non maximum suppression.
+  optional NonMaximumSuppressionParameter nms_param = 4;
+  // Parameters used for saving detection results.
+  optional SaveOutputParameter save_output_param = 5;
+  // Type of coding method for bbox.
+  optional PriorBoxParameter.CodeType code_type = 6 [default = CORNER];
+  // If true, variance is encoded in target; otherwise we need to adjust the
+  // predicted offset accordingly.
+  optional bool variance_encoded_in_target = 8 [default = false];
+  // Number of total bboxes to be kept per image after nms step.
+  // -1 means keeping all bboxes after nms step.
+  optional int32 keep_top_k = 7 [default = -1];
+  // Only consider detections whose confidences are larger than a threshold.
+  // If not provided, consider all boxes.
+  optional float confidence_threshold = 9;
+  // If true, visualize the detection results.
+  optional bool visualize = 10 [default = false];
+  // The threshold used to visualize the detection results.
+  optional float visualize_threshold = 11;
+}
+
+
+// @
+message PermuteParameter {
+  // The new orders of the axes of data. Notice it should be with
+  // in the same range as the input data, and it starts from 0.
+  // Do not provide repeated order.
+  repeated uint32 order = 1;
+}
+
+// @
+// Message that stores parameters used by NormalizeLayer
+message NormalizeParameter {
+  optional bool across_spatial = 1 [default = true];
+  // Initial value of scale. Default is 1.0 for all
+  optional FillerParameter scale_filler = 2;
+  // Whether or not scale parameters are shared across channels.
+  optional bool channel_shared = 3 [default = true];
+  // Epsilon for not dividing by zero while normalizing variance
+  optional float eps = 4 [default = 1e-10];
+}
+
+// @
+message VideoDataParameter{
+  enum VideoType {
+    WEBCAM = 0;
+  }
+  optional VideoType video_type = 1 [default = WEBCAM];
+  optional int32 device_id = 2 [default = 0];
+}
+
+// @
+message EvalDetectionParameter {
+  enum ScoreType {
+    OBJ = 0;
+    PROB = 1;
+    MULTIPLY = 2;
+  }
+  // Yolo detection evaluation layer
+  optional uint32 side = 1 [default = 7];
+  optional uint32 num_class = 2 [default = 20];
+  optional uint32 num_object = 3 [default = 2];
+  optional float threshold = 4 [default = 0.5];
+  optional bool sqrt = 5 [default = true];
+  optional bool constriant = 6 [default = true];
+  optional ScoreType score_type = 7 [default = MULTIPLY];
+  optional float nms = 8 [default = -1];
+  repeated float biases = 9;
 }
 
 // @Message that store parameters used by MultiBoxLossLayer
