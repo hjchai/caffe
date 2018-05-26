@@ -309,22 +309,20 @@ bool ReadXMLToAnnotatedDatum(const string& labelfile, const int img_height,
           string name = pt2.data();
           if (name_to_label.find(name) == name_to_label.end()) {
             //LOG(FATAL) << "Unknown name: " << name;
-	    LOG(INFO) << "Unknown name: " << name;
-	    return false;  //force to end	
+            LOG(INFO) << "Unknown name: " << name;
+            return false;  //force to end	
           }
 	 
           int label = name_to_label.find(name)->second;		//find label.	1-20?
           //LOG(INFO) << label;
-	  bool found_group = false;
+          bool found_group = false;
           for (int g = 0; g < anno_datum->annotation_group_size(); ++g) {	//anno_datum records one image annotation.	//group size == categories.
-            AnnotationGroup* anno_group =
-                anno_datum->mutable_annotation_group(g);
+            AnnotationGroup* anno_group = anno_datum->mutable_annotation_group(g);
             if (label == anno_group->group_label()) {
               if (anno_group->annotation_size() == 0) {
                 instance_id = 0;
               } else {
-                instance_id = anno_group->annotation(
-                    anno_group->annotation_size() - 1).instance_id() + 1;
+                instance_id = anno_group->annotation(anno_group->annotation_size() - 1).instance_id() + 1;
               }
               anno = anno_group->add_annotation();	//to *anno. initialize.
               found_group = true;

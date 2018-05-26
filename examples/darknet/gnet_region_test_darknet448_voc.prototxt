@@ -1041,7 +1041,7 @@ layer {
   bottom: "data"
   top: "eval_det"
   eval_detection_param {
-    side: 13
+    side: 17
     num_class: 20
     num_object: 5
     threshold: 0.5

@@ -256,6 +256,7 @@ void EvalDetectionLayer<Dtype>::Reshape(
   //CHECK_EQ(label_count, tmp_label_count);
 
   vector<int> top_shape(2, 1);
+  // batch size
   top_shape[0] = bottom[0]->num();
   //top_shape[1] = num_class_ + side_ * side_ * num_object_ * 4; 
   top_shape[1] = num_class_ + side_ * side_ * num_object_ * 4; //num_class_(num of each gt class) + 13 * 13 * 5 * (label + score + tp + fp)
@@ -289,8 +290,8 @@ void EvalDetectionLayer<Dtype>::Forward_cpu(
 
     for (int i = 0; i < num_boxes; ++ i) {
         vector<Dtype> box;
-        int item_id = label_data[i * 8 + 0]; //item_id
-	if (item_id == -1) continue;
+        int item_id = label_data[i * 8 + 0]; //item_id: index in a batch. ex. 1 out of 8
+        if (item_id == -1) continue;
 	
         Dtype xmin = label_data[i * 8 + 3];
         Dtype ymin = label_data[i * 8 + 4];
