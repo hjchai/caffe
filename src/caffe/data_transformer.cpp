@@ -1,11 +1,12 @@
 #ifdef USE_OPENCV
 #include <opencv2/core/core.hpp>
-// @
-#include "caffe/util/im_transforms.hpp"
+
 #endif  // USE_OPENCV
 
 #include <string>
 #include <vector>
+// @
+#include "caffe/util/im_transforms.hpp"
 
 #include "caffe/data_transformer.hpp"
 #include "caffe/util/bbox_util.hpp"
@@ -14,7 +15,7 @@
 #include "caffe/util/rng.hpp"
 
 namespace caffe {
-
+    
 template<typename Dtype>
 DataTransformer<Dtype>::DataTransformer(const TransformationParameter& param,
     Phase phase)
@@ -1030,6 +1031,41 @@ void DataTransformer<Dtype>::Transform(Blob<Dtype>* input_blob,
   }
 }
 
+// template<typename Dtype>
+// vector<int> DataTransformer<Dtype>::InferBlobShape(const Datum& datum) {
+//   if (datum.encoded()) {
+// #ifdef USE_OPENCV
+//     CHECK(!(param_.force_color() && param_.force_gray()))
+//         << "cannot set both force_color and force_gray";
+//     cv::Mat cv_img;
+//     if (param_.force_color() || param_.force_gray()) {
+//     // If force_color then decode in color otherwise decode in gray.
+//       cv_img = DecodeDatumToCVMat(datum, param_.force_color());
+//     } else {
+//       cv_img = DecodeDatumToCVMatNative(datum);
+//     }
+//     // InferBlobShape using the cv::image.
+//     return InferBlobShape(cv_img);
+// #else
+//     LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
+// #endif  // USE_OPENCV
+//   }
+//   const int crop_size = param_.crop_size();
+//   const int datum_channels = datum.channels();
+//   const int datum_height = datum.height();
+//   const int datum_width = datum.width();
+//   // Check dimensions.
+//   CHECK_GT(datum_channels, 0);
+//   CHECK_GE(datum_height, crop_size);
+//   CHECK_GE(datum_width, crop_size);
+//   // Build BlobShape.
+//   vector<int> shape(4);
+//   shape[0] = 1;
+//   shape[1] = datum_channels;
+//   shape[2] = (crop_size)? crop_size: datum_height;
+//   shape[3] = (crop_size)? crop_size: datum_width;
+//   return shape;
+// }
 template<typename Dtype>
 vector<int> DataTransformer<Dtype>::InferBlobShape(const Datum& datum) {
   if (datum.encoded()) {
@@ -1049,20 +1085,33 @@ vector<int> DataTransformer<Dtype>::InferBlobShape(const Datum& datum) {
     LOG(FATAL) << "Encoded datum requires OpenCV; compile with USE_OPENCV.";
 #endif  // USE_OPENCV
   }
+
   const int crop_size = param_.crop_size();
+  int crop_h = param_.crop_h();
+  int crop_w = param_.crop_w();
+  if (crop_size) {
+    crop_h = crop_size;
+    crop_w = crop_size;
+  }
   const int datum_channels = datum.channels();
-  const int datum_height = datum.height();
-  const int datum_width = datum.width();
+  int datum_height = datum.height();
+  int datum_width = datum.width();
+
   // Check dimensions.
   CHECK_GT(datum_channels, 0);
-  CHECK_GE(datum_height, crop_size);
-  CHECK_GE(datum_width, crop_size);
+  if (param_.has_resize_param()) {
+    InferNewSize(param_.resize_param(), datum_width, datum_height,
+                 &datum_width, &datum_height);
+  }
+  CHECK_GE(datum_height, crop_h);
+  CHECK_GE(datum_width, crop_w);
+
   // Build BlobShape.
   vector<int> shape(4);
   shape[0] = 1;
   shape[1] = datum_channels;
-  shape[2] = (crop_size)? crop_size: datum_height;
-  shape[3] = (crop_size)? crop_size: datum_width;
+  shape[2] = (crop_h)? crop_h: datum_height;
+  shape[3] = (crop_w)? crop_w: datum_width;
   return shape;
 }
 
@@ -1079,22 +1128,51 @@ vector<int> DataTransformer<Dtype>::InferBlobShape(
 }
 
 #ifdef USE_OPENCV
+// template<typename Dtype>
+// vector<int> DataTransformer<Dtype>::InferBlobShape(const cv::Mat& cv_img) {
+//   const int crop_size = param_.crop_size();
+//   const int img_channels = cv_img.channels();
+//   const int img_height = cv_img.rows;
+//   const int img_width = cv_img.cols;
+//   // Check dimensions.
+//   CHECK_GT(img_channels, 0);
+//   CHECK_GE(img_height, crop_size);
+//   CHECK_GE(img_width, crop_size);
+//   // Build BlobShape.
+//   vector<int> shape(4);
+//   shape[0] = 1;
+//   shape[1] = img_channels;
+//   shape[2] = (crop_size)? crop_size: img_height;
+//   shape[3] = (crop_size)? crop_size: img_width;
+//   return shape;
+// }
 template<typename Dtype>
 vector<int> DataTransformer<Dtype>::InferBlobShape(const cv::Mat& cv_img) {
   const int crop_size = param_.crop_size();
+  int crop_h = param_.crop_h();
+  int crop_w = param_.crop_w();
+  if (crop_size) {
+    crop_h = crop_size;
+    crop_w = crop_size;
+  }
   const int img_channels = cv_img.channels();
-  const int img_height = cv_img.rows;
-  const int img_width = cv_img.cols;
+  int img_height = cv_img.rows;
+  int img_width = cv_img.cols;
   // Check dimensions.
   CHECK_GT(img_channels, 0);
-  CHECK_GE(img_height, crop_size);
-  CHECK_GE(img_width, crop_size);
+  if (param_.has_resize_param()) {
+    InferNewSize(param_.resize_param(), img_width, img_height,
+                 &img_width, &img_height);
+  }
+  CHECK_GE(img_height, crop_h);
+  CHECK_GE(img_width, crop_w);
+
   // Build BlobShape.
   vector<int> shape(4);
   shape[0] = 1;
   shape[1] = img_channels;
-  shape[2] = (crop_size)? crop_size: img_height;
-  shape[3] = (crop_size)? crop_size: img_width;
+  shape[2] = (crop_h)? crop_h: img_height;
+  shape[3] = (crop_w)? crop_w: img_width;
   return shape;
 }
 

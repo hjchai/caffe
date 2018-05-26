@@ -117,7 +117,7 @@ void VideoDataLayer<Dtype>::load_batch(Batch<Dtype>* batch) {
       // Apply transformations (mirror, crop...) to the image
       int offset = batch->data_.offset(item_id);
       this->transformed_data_.set_cpu_data(top_data + offset);
-      this->data_transformer_->Transform(cv_img, &(this->transformed_data_));
+      this->data_transformer_->Transform_(cv_img, &(this->transformed_data_));
       trans_time += timer.MicroSeconds();
     }
     if (this->output_labels_) {
