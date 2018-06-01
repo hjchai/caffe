@@ -142,6 +142,9 @@ class DataTransformer {
   void Transform_(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob);
   void Transform(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob,
                 NormalizedBBox* crop_bbox, bool* do_mirror);
+  //@
+  void Transform(const cv::Mat& cv_img, Blob<Dtype>* transformed_blob,
+                 bool preserve_pixel_vals);
     
   /**
    * @brief Crops img according to bbox.

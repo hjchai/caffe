@@ -1,0 +1,1 @@
+/home/huajun/projects/caffe/examples/segnet/test/0001TP_008550.png /home/huajun/projects/caffe/examples/segnet/testannot/0001TP_008550.png
