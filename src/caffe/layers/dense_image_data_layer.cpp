@@ -76,7 +76,7 @@ void DenseImageDataLayer<Dtype>::DataLayerSetUp(const vector<Blob<Dtype>*>& bott
   // Read an image, and use it to initialize the top blobs.
   cv::Mat cv_img = ReadImageToCVMat(root_folder + lines_[lines_id_].first,
                                     new_height, new_width, is_color);
-  const int channels = cv_img.channels();
+  //const int channels = cv_img.channels();
   const int height = cv_img.rows;
   const int width = cv_img.cols;
 

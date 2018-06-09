@@ -55,25 +55,25 @@ void disp(Blob<Dtype>& swap)
   return;
 }
 
-template <typename Dtype>
-Dtype softmax_region(Dtype* input, int classes)
-{
-  Dtype sum = 0;
-  Dtype large = input[0];
-  for (int i = 0; i < classes; ++i){
-    if (input[i] > large)
-      large = input[i];
-  }
-  for (int i = 0; i < classes; ++i){
-    Dtype e = exp(input[i] - large);
-    sum += e;
-    input[i] = e;
-  }
-  for (int i = 0; i < classes; ++i){
-    input[i] = input[i] / sum;
-  }
-  return 0;
-}
+// template <typename Dtype>
+// Dtype softmax_region(Dtype* input, int classes)
+// {
+//   Dtype sum = 0;
+//   Dtype large = input[0];
+//   for (int i = 0; i < classes; ++i){
+//     if (input[i] > large)
+//       large = input[i];
+//   }
+//   for (int i = 0; i < classes; ++i){
+//     Dtype e = exp(input[i] - large);
+//     sum += e;
+//     input[i] = e;
+//   }
+//   for (int i = 0; i < classes; ++i){
+//     input[i] = input[i] / sum;
+//   }
+//   return 0;
+// }
 
 template <typename Dtype>
 void softmax_tree(Dtype* input, tree *t)
