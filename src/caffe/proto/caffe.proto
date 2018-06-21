@@ -500,6 +500,13 @@ message LayerParameter {
   
   // roipooling
   optional ROIPoolingParameter roi_pooling_param = 8266711;
+  // Yolov3 YoloOutPut layer
+  optional YoloOutputParameter yolo_output_param = 304;
+}
+
+// @Message that stores parameters used by YoloOutputLayer
+message YoloOutputParameter {
+  optional uint32 num_classes = 1 [default = 0]; // number of classes
 }
 
 // @Message that stores parameters used by ROIPoolingLayer
